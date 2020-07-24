@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, session, abort, flash, request
 from flask_bootstrap import Bootstrap
 # used for online forms
 from flask_wtf import FlaskForm
@@ -11,6 +11,7 @@ from wtforms.validators import InputRequired, Email, Length
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecretkey!'
 Bootstrap(app)
+
 
 # creating classes for the forms
 # class for log in form
@@ -28,17 +29,21 @@ class RegisterForm(FlaskForm):
 
 @app.route('/')
 def index():
+    session["attempt"] = 3
     return render_template('index.html')
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # instantiating a form
     form = LoginForm()
-
     # checking if the form has been submitted
     if form.validate_on_submit():
-        return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
+       # return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
+        return render_template('404.html')
     return render_template('login.html', form=form)
 
 
@@ -47,9 +52,9 @@ def signup():
     # initialising form
     form = RegisterForm()
     # checking if the form has been submitted
-    if form.validate_on_submit():
-        csvfile = open('users.csv')
-        return '<h1> New user has been created </h>'
+    # if form.validate_on_submit():
+        # csvfile = open('users.csv')
+        # return '<h1> New user has been created </h>'
         # new_user = User(username=form.username.data, email=form.email.data, password=form.password.data)
         # db.session.add(new_user)
         # db.session.commit()
@@ -60,6 +65,10 @@ def signup():
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 if __name__ == '__main__':
